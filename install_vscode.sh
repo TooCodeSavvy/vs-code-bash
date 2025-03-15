@@ -85,10 +85,10 @@ else
     echo "❌ Error: Failed to download DDEV. Check your internet connection."
     exit 1
 fi
-
-# Switch to the new user and verify the installation
-echo "Switching to 'developer' user to verify installations..."
-sudo su - developer -c "docker --version && ddev --version && node -v && npm -v"
+ 
+# Switch to the new user and drop into their shell
+echo "Switching to 'developer' user..."
+sudo su - developer 
 
 # Final message
 echo "✅ Installation complete!"
