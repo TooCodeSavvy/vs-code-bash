@@ -24,32 +24,6 @@ Requirements
 Installation
 ------------
 
-1.  Clone the repository:Automated Development Environment Setup
-=======================================
-
-This repository provides a bash script that automates the installation of essential development tools on a Debian-based system. The script installs the following:
-
--   **Visual Studio Code (VS Code)**
--   **Node.js and npm**
--   **Node Version Manager (NVM)**
--   **Docker**
--   **DDEV**
-
-It also creates a new user for Docker and DDEV usage and adds the user to the Docker group for easy Docker access without `sudo`.
-
-* * * * *
-
-Requirements
-------------
-
--   A Debian-based system (e.g., Ubuntu).
--   Sudo privileges to run the installation.
-
-* * * * *
-
-Installation
-------------
-
 1. Clone the repository:
  ```
  git clone https://github.com/TooCodeSavvy/vs-code-bash.git
