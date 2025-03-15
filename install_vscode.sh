@@ -33,7 +33,7 @@ sudo apt install -y nodejs npm
 
 # Install NVM (Node Version Manager) to manage multiple Node.js versions
 echo "Installing NVM (Node Version Manager)..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
 
 # Load NVM into the shell session
 echo "Loading NVM into shell session..."
