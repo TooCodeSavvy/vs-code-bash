@@ -42,11 +42,17 @@ export NVM_DIR="$HOME/.nvm"
 
 # Install the latest Node.js version using NVM
 echo "Installing the latest Node.js version via NVM..."
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+ 
 nvm install node
+
 
 # Install Docker
 echo "Installing Docker..."
-sudo apt remove -y docker docker-engine docker.io containerd runc  # Remove old versions
+sudo apt remove -y docker docker.io containerd runc  
+sudo apt update
 sudo apt install -y \
     ca-certificates \
     curl \
@@ -55,22 +61,25 @@ sudo apt install -y \
 
 # Add Docker's official GPG key and repository
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bookworm stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Update and install Docker
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 
 # Install DDEV
-echo "Installing DDEV..."
-wget https://github.com/ddev/ddev/releases/download/v1.24.3/ddev_1.24.3_linux_amd64.deb
-sudo dpkg -i ddev_1.24.3_linux_amd64.deb
+echo "Downloading DDEV..."
+wget -O ddev.deb https://github.com/ddev/ddev/releases/download/v1.24.3/ddev_1.24.3_linux_amd64.deb
 
-# Fix dependencies if needed
-sudo apt-get install -f -y
-
-# Remove downloaded .deb file to clean up
-rm ddev_1.24.3_linux_amd64.deb
+if [ -f "ddev.deb" ]; then
+    echo "Installing DDEV..."
+    sudo dpkg -i ddev.deb
+    sudo apt-get install -f -y  # Fix missing dependencies
+    rm ddev.deb  # Cleanup
+else
+    echo "❌ Error: Failed to download DDEV. Check your internet connection."
+    exit 1
+fi
 
 # Verify the installation of Docker, DDEV, Node.js, and npm
 echo "Verifying installations..."
