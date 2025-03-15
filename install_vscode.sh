@@ -1,18 +1,16 @@
 #!/bin/bash
 
 # This script installs Visual Studio Code, npm (Node.js), NVM, Docker, and DDEV on a Debian-based system.
+# It will also create a new user and add it to the docker group for easier Docker usage.
 # Ensure you run it as root or with sudo privileges.
 
 # Update package list
 echo "Updating package list..."
 sudo apt update
 
-echo "Installing wget..."
-sudo apt install -y wget
-
 # Install required dependencies (curl, apt-transport-https, and gpg)
 echo "Installing required dependencies..."
-sudo apt install -y curl apt-transport-https gpg lsb-release ca-certificates
+sudo apt install -y curl apt-transport-https gpg lsb-release ca-certificates wget
 
 # Add Microsoft's GPG key to verify package authenticity
 echo "Adding Microsoft's GPG key..."
@@ -45,12 +43,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # Install the latest Node.js version using NVM
 echo "Installing the latest Node.js version via NVM..."
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
- 
 nvm install node
-
 
 # Install Docker
 echo "Installing Docker..."
@@ -70,6 +63,15 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] 
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 
+# Add a new user for Docker and DDEV usage
+echo "Creating a new user 'developer'..."
+sudo useradd -m -s /bin/bash developer
+echo "developer:developer" | sudo chpasswd
+
+# Add the user to the Docker group to allow Docker usage without sudo
+echo "Adding 'developer' to the docker group..."
+sudo usermod -aG docker developer
+
 # Install DDEV
 echo "Downloading DDEV..."
 wget -O ddev.deb https://github.com/ddev/ddev/releases/download/v1.24.3/ddev_1.24.3_linux_amd64.deb
@@ -84,12 +86,9 @@ else
     exit 1
 fi
 
-# Verify the installation of Docker, DDEV, Node.js, and npm
-echo "Verifying installations..."
-docker --version
-ddev --version
-node -v
-npm -v
+# Switch to the new user and verify the installation
+echo "Switching to 'developer' user to verify installations..."
+sudo su - developer -c "docker --version && ddev --version && node -v && npm -v"
 
 # Final message
 echo "✅ Installation complete!"
