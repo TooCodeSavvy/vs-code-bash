@@ -33,15 +33,15 @@ echo "Installing Node.js and npm..."
 sudo apt install -y nodejs npm
 
 # Install NVM (Node Version Manager) to manage multiple Node.js versions
-echo "Installing NVM (Node Version Manager)..." 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash 
+echo "Installing NVM (Node Version Manager)..."
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
 
-# Load NVM into the shell session
-echo "Loading NVM into shell session..."
+# Load NVM into the shell session for root user
+echo "Loading NVM for root..."
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Install the latest Node.js version using NVM
+# Install the latest Node.js version using NVM for root user
 echo "Installing the latest Node.js version via NVM..."
 nvm install node
 
@@ -85,10 +85,14 @@ else
     echo "❌ Error: Failed to download DDEV. Check your internet connection."
     exit 1
 fi
- 
+
+# Add NVM config to the new user's .bashrc file to load NVM automatically
+echo "Adding NVM setup to developer's .bashrc..."
+echo -e "\n# NVM setup\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\"" | sudo tee -a /home/developer/.bashrc
+
 # Switch to the new user and drop into their shell
 echo "Switching to 'developer' user..."
-sudo su - developer 
+sudo su - developer
 
 # Final message
 echo "✅ Installation complete!"
