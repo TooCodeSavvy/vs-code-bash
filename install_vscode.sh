@@ -7,6 +7,9 @@
 echo "Updating package list..."
 sudo apt update
 
+echo "Installing wget..."
+sudo apt install -y wget
+
 # Install required dependencies (curl, apt-transport-https, and gpg)
 echo "Installing required dependencies..."
 sudo apt install -y curl apt-transport-https gpg lsb-release ca-certificates
