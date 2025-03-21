@@ -74,17 +74,21 @@ sudo usermod -aG docker developer
 
 # Install DDEV
 echo "Downloading DDEV..."
-wget -O ddev.deb https://github.com/ddev/ddev/releases/download/v1.24.3/ddev_1.24.3_linux_amd64.deb
 
-if [ -f "ddev.deb" ]; then
-    echo "Installing DDEV..."
-    sudo dpkg -i ddev.deb
-    sudo apt-get install -f -y  # Fix missing dependencies
-    rm ddev.deb  # Cleanup
-else
-    echo "❌ Error: Failed to download DDEV. Check your internet connection."
-    exit 1
-fi
+sudo sh -c 'echo ""'
+sudo apt-get update && sudo apt-get install -y curl
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://pkg.ddev.com/apt/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/ddev.gpg > /dev/null
+sudo chmod a+r /etc/apt/keyrings/ddev.gpg
+
+sudo sh -c 'echo ""'
+echo "deb [signed-by=/etc/apt/keyrings/ddev.gpg] https://pkg.ddev.com/apt/ * *" | sudo tee /etc/apt/sources.list.d/ddev.list >/dev/null
+sudo apt-get update && sudo apt-get install -y ddev 
+
+# Install NVM for the 'developer' user
+echo "Installing NVM for the 'developer' user..."
+sudo -u developer curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+sudo -u developer bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install node'
 
 # Add NVM config to the new user's .bashrc file to load NVM automatically
 echo "Adding NVM setup to developer's .bashrc..."
