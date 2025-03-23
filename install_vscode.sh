@@ -1,26 +1,29 @@
 #!/bin/bash
 
-# This script installs Visual Studio Code, npm (Node.js), NVM, Docker, and DDEV on a Debian-based system.
-# It will also create a new user and add it to the docker group for easier Docker usage.
+# This script installs Visual Studio Code, npm (Node.js), NVM, Docker, DDEV, PHP 8.4, and Composer on a Debian-based system.
 # Ensure you run it as root or with sudo privileges.
 
 # Update package list
 echo "Updating package list..."
 sudo apt update
 
-# Install required dependencies (curl, apt-transport-https, and gpg)
+# Install required dependencies
 echo "Installing required dependencies..."
-sudo apt install -y curl apt-transport-https gpg lsb-release ca-certificates wget
+sudo apt install -y curl apt-transport-https gpg lsb-release ca-certificates wget unzip
 
-# Add Microsoft's GPG key to verify package authenticity
+# Install PHP 8.4 and required extensions
+echo "Installing PHP 8.4 and required extensions..."
+sudo apt install -y php8.4 php8.4-cli php8.4-mbstring php8.4-zip php8.4-xml php8.4-curl php8.4-gd php8.4-mysql php8.4-bcmath php8.4-tokenizer
+
+# Add Microsoft's GPG key for VS Code
 echo "Adding Microsoft's GPG key..."
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/packages.microsoft.gpg > /dev/null
 
-# Add the Visual Studio Code repository to the apt sources list
+# Add the Visual Studio Code repository
 echo "Adding Visual Studio Code repository..."
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 
-# Update package list again to include the VS Code repository
+# Update package list again
 echo "Updating package list with VS Code repository..."
 sudo apt update
 
@@ -32,16 +35,15 @@ sudo apt install -y code
 echo "Installing Node.js and npm..."
 sudo apt install -y nodejs npm
 
-# Install NVM (Node Version Manager) to manage multiple Node.js versions
+# Install NVM (Node Version Manager)
 echo "Installing NVM (Node Version Manager)..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
 
-# Load NVM into the shell session for root user
-echo "Loading NVM for root..."
+# Load NVM into the shell session
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/nvm.sh" ] && \ . "$NVM_DIR/nvm.sh"
 
-# Install the latest Node.js version using NVM for root user
+# Install the latest Node.js version using NVM
 echo "Installing the latest Node.js version via NVM..."
 nvm install node
 
@@ -49,11 +51,7 @@ nvm install node
 echo "Installing Docker..."
 sudo apt remove -y docker docker.io containerd runc  
 sudo apt update
-sudo apt install -y \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
+sudo apt install -y ca-certificates curl gnupg lsb-release
 
 # Add Docker's official GPG key and repository
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -68,35 +66,39 @@ echo "Creating a new user 'developer'..."
 sudo useradd -m -s /bin/bash developer
 echo "developer:developer" | sudo chpasswd
 
-# Add the user to the Docker group to allow Docker usage without sudo
+# Add the user to the Docker group
 echo "Adding 'developer' to the docker group..."
 sudo usermod -aG docker developer
 
 # Install DDEV
-echo "Downloading DDEV..."
-
-sudo sh -c 'echo ""'
+echo "Installing DDEV..."
 sudo apt-get update && sudo apt-get install -y curl
-sudo install -m 0755 -d /etc/apt/keyrings
+test -d /etc/apt/keyrings || sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://pkg.ddev.com/apt/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/ddev.gpg > /dev/null
 sudo chmod a+r /etc/apt/keyrings/ddev.gpg
+echo "deb [signed-by=/etc/apt/keyrings/ddev.gpg] https://pkg.ddev.com/apt/ * *" | sudo tee /etc/apt/sources.list.d/ddev.list > /dev/null
+sudo apt-get update && sudo apt-get install -y ddev
 
-sudo sh -c 'echo ""'
-echo "deb [signed-by=/etc/apt/keyrings/ddev.gpg] https://pkg.ddev.com/apt/ * *" | sudo tee /etc/apt/sources.list.d/ddev.list >/dev/null
-sudo apt-get update && sudo apt-get install -y ddev 
+# Install Composer
+echo "Installing Composer..."
+cd ~
+curl -sS https://getcomposer.org/installer -o composer-setup.php
+HASH=`curl -sS https://composer.github.io/installer.sig`
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+# Verify Composer installation
+echo "Verifying Composer installation..."
+composer --version
 
 # Install NVM for the 'developer' user
 echo "Installing NVM for the 'developer' user..."
 sudo -u developer curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-sudo -u developer bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install node'
+sudo -u developer bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \ . "$NVM_DIR/nvm.sh" && nvm install node'
 
-# Add NVM config to the new user's .bashrc file to load NVM automatically
+# Add NVM config to the new user's .bashrc file
 echo "Adding NVM setup to developer's .bashrc..."
-echo -e "\n# NVM setup\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\"" | sudo tee -a /home/developer/.bashrc
-
-# Switch to the new user and drop into their shell
-echo "Switching to 'developer' user..."
-sudo su - developer
+echo -e "\n# NVM setup\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\"" | sudo tee -a /home/developer/.bashrc
 
 # Final message
 echo "✅ Installation complete!"
@@ -106,3 +108,4 @@ echo "- Node.js & npm: Use 'node -v' and 'npm -v'"
 echo "- NVM: Manage Node.js versions with 'nvm'"
 echo "- Docker: Check with 'docker --version'"
 echo "- DDEV: Run 'ddev' to see available commands"
+echo "- Composer: Run 'composer --version' to verify installation"
