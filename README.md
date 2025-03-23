@@ -8,6 +8,7 @@ This repository provides a bash script that automates the installation of essent
 -   **Node Version Manager (NVM)**
 -   **Docker**
 -   **DDEV**
+-   **Composer**
 
 It also creates a new user for Docker and DDEV usage and adds the user to the Docker group for easy Docker access without `sudo`.
 
@@ -45,6 +46,7 @@ Features
 -   Installs **NVM** to manage multiple versions of Node.js.
 -   Installs **Docker** for containerization.
 -   Installs **DDEV** for local development environments.
+-   Installs **Composer** for local development environments.
 -   Creates a new user (`developer`) for easier Docker usage and adds it to the Docker group.
 
 * * * * *
@@ -59,3 +61,4 @@ Usage
     -   **NVM**: `nvm`
     -   **Docker**: `docker --version`
     -   **DDEV**: `ddev`
+    -   **Composer**: `composer --version`
