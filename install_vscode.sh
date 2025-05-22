@@ -3,8 +3,13 @@
 # This script installs Visual Studio Code, npm (Node.js), NVM, Docker, DDEV, PHP 8.4, and Composer on a Debian-based system.
 # Ensure you run it as root or with sudo privileges.
 
-# Update package list
-echo "Updating package list..."
+# Add Sury's PHP repository to get PHP 8.4
+echo "Adding Sury PHP repository..."
+sudo apt install -y lsb-release apt-transport-https ca-certificates wget
+wget -qO - https://packages.sury.org/php/apt.gpg | sudo tee /usr/share/keyrings/php-sury.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/php-sury.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php-sury.list
+
+# Update package list again after adding new repo
 sudo apt update
 
 # Install required dependencies
